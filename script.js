@@ -1,21 +1,4 @@
-/* =====================================================
-   ALING NENA'S SARI-SARI STORE POS
-   Members: Lian Suzaine Sultan & Jennie Lou L. Redondo
-   ----------------------------------------------------
-   PARTITION OF WORK (matches README.md — 5 items each):
-   - Lian Suzaine Sultan   -> Login & session handling, product
-                              catalog, search & filter, cart &
-                              transaction entry logic, reporting
-                              features
-   - Jennie Lou L. Redondo -> Checkout process, transaction
-                              records, discounts, receipts,
-                              utang/credit log & customer name
-                              tracking
-===================================================== */
 
-/* =====================================================
-   DATA — Product catalog (given dataset, no database)
-===================================================== */
 const groceryItems = [
   { product_id: 1, product_name: "Dried Mangoes (200g)", product_price: 180 },
   { product_id: 2, product_name: "Banana Chips (200g)", product_price: 120 },
@@ -76,10 +59,6 @@ const users = [
   { username: "admin", password: "admin123", name: "Store Admin",    role: "admin" }
 ];
 
-/* =====================================================
-   STATE (all in-memory arrays — resets on page reload,
-   per project spec: "no database required")
-===================================================== */
 let currentSession = null;      // { username, name, role, shift, loginTime }
 let cart = [];                  // [{ product_id, product_name, product_price, quantity }]
 let transactions = [];          // all recorded transactions, across logins in this browser session
@@ -87,9 +66,7 @@ let creditLog = [];             // [{ creditId, customerName, idNumber, transact
 let txnCounter = 1000;
 let creditCounter = 5000;
 
-/* =====================================================
-   HELPERS
-===================================================== */
+
 const peso = n => "₱" + Number(n).toFixed(2);
 
 function emojiFor(name){
@@ -119,11 +96,6 @@ function showToast(msg){
   showToast._tm = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-/* =====================================================================
-   PART 1 — Lian Suzaine Sultan
-   Login/session handling, product catalog, search & filter,
-   cart & transaction-entry logic, reporting features
-===================================================================== */
 
 /* -----------------------------------------------------
    LOGIN
@@ -310,11 +282,7 @@ document.getElementById('clearCartBtn').addEventListener('click', function(){
   }
 });
 
-/* =====================================================================
-   PART 2 — Jennie Lou L. Redondo
-   Checkout process, transaction records, discounts, receipts,
-   reports, utang/credit log
-===================================================================== */
+
 
 /* -----------------------------------------------------
    CHECKOUT
@@ -559,12 +527,7 @@ document.getElementById('closeReceipt').addEventListener('click', function(){
   document.getElementById('receiptModal').classList.remove('show');
 });
 
-/* -----------------------------------------------------
-   REPORTS  (back to Lian Suzaine Sultan's part —
-   placed here in the file just to stay next to the
-   checkout flow that feeds it, but this section is
-   Lian's per the partition table)
------------------------------------------------------ */
+
 function openReports(endingShift){
   const modal = document.getElementById('reportsModal');
   document.getElementById('adminToggleWrap').style.display = currentSession.role === 'admin' ? 'block' : 'none';
