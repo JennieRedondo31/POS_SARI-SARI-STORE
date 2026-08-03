@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopkeeper POS — Corner Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Shopkeeper <span>POS</span></h1>
+    <p class="sub">Log in to start your shift, Cashier 🛍️</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="off" placeholder="e.g. juan" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="off" placeholder="" />
+      </div>
+      <div class="field">
+        <label for="shift">Shift</label>
+        <select id="shift">
+          <option value="Morning">Morning (6AM–2PM)</option>
+          <option value="Afternoon">Afternoon (2PM–10PM)</option>
+          <option value="Night">Night (10PM–6AM)</option>
+        </select>
+      </div>
+      <button type="submit" class="login-btn">Start Shift</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+    <div class="hint-box">
+      <b>Demo accounts:</b><br>
+      juan / 1234 — Cashier<br>
+      maria / 1234 — Cashier<br>
+      admin / admin123 — Admin (sees all shifts)
+    </div>
+  </div>
+</div>
+
+<!-- ===================== POS SCREEN ===================== -->
+<div id="posScreen">
+  <div class="signboard">
+    <div class="store-name">Nena's <span>Sari-Sari</span> Store</div>
+    <div class="toolbar">
+      <div class="who">👤 <b id="cashierName"></b> &nbsp;|&nbsp; <span class="shift-tag" id="shiftBadge"></span></div>
+      <button class="icon-btn" id="utangBtn">💳 <span class="icon-btn-label">Credit List</span></button>
+      <button class="icon-btn" id="reportsBtn">📊 <span class="icon-btn-label">Reports</span></button>
+      <button class="icon-btn" id="logoutBtn">🚪 <span class="icon-btn-label">End Shift</span></button>
+    </div>
+  </div>
+
+  <div class="pos-layout">
+    <!-- Product catalog -->
+    <div class="panel">
+      <h2>🛍️ Product Catalog <span style="font-size:0.7rem; font-weight:600; color:#6b5f45;">— tap an item to ring it up instantly</span></h2>
+      <div class="catalog-head">
+        <input type="text" id="searchInput" placeholder="Search product by name..." />
+        <select id="priceFilter">
+          <option value="">All prices</option>
+          <option value="0-100">₱0 – ₱100</option>
+          <option value="100-200">₱100 – ₱200</option>
+          <option value="200-1000">₱200+</option>
+        </select>
+      </div>
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+
+    <!-- Cart -->
+    <div class="panel cart-panel">
+      <h2>🧾 Live Transaction</h2>
+      <div class="cart-items" id="cartItems">
+        <div class="empty-cart">No items yet. Tap a product on the left to start.</div>
+      </div>
+      <div class="cart-summary">
+        <div class="sum-line"><span>Subtotal</span><span class="mono" id="sumSubtotal">₱0.00</span></div>
+        <div class="sum-line discount" id="discountLine" style="display:none;"><span>Discount (10%)</span><span class="mono" id="sumDiscount">-₱0.00</span></div>
+        <div class="sum-line total"><span>TOTAL</span><span id="sumTotal">₱0.00</span></div>
+        <button class="checkout-btn" id="checkoutBtn" disabled>Proceed to Checkout</button>
+        <button class="clear-btn" id="clearCartBtn">Clear order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CHECKOUT MODAL ===================== -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-box">
+    <h2>💵 Checkout</h2>
+
+    <div class="pay-tabs">
+      <button type="button" class="pay-tab active" id="tabCash" data-method="cash">💵 Cash</button>
+      <button type="button" class="pay-tab" id="tabCredit" data-method="credit">📒 Credit</button>
+    </div>
+
+    <div class="field">
+      <label id="customerNameLabel">Customer name (optional)</label>
+      <input type="text" id="customerName" placeholder="Walk-in customer" />
+    </div>
+
+    <div class="discount-box">
+      <label class="chk">
+        <input type="checkbox" id="seniorPwdCheck" />
+        🎫 Apply Senior Citizen / PWD Discount (5%)
+      </label>
+      <div class="sub-fields" id="seniorPwdFields">
+        <div class="field" style="margin-top:10px; margin-bottom:0;">
+          <label for="seniorIdInput">Senior/PWD ID Number</label>
+          <input type="text" id="seniorIdInput" placeholder="e.g. SC-00123 or PWD-00456" />
+        </div>
+        <button type="button" class="btn-primary" id="applySeniorPwdBtn" style="width:100%; margin-top:10px;">Apply Discount</button>
+        <div id="seniorPwdAppliedNote" style="display:none; margin-top:8px; font-size:0.78rem; color:var(--awning-dark); font-weight:700;">✓ Discount applied</div>
+      </div>
+    </div>
+
+    <div class="sum-line"><span>Subtotal</span><span class="mono" id="coSubtotal">₱0.00</span></div>
+    <div class="sum-line discount" id="coDiscountLine" style="display:none;"><span id="coDiscountLabel">Discount</span><span class="mono" id="coDiscount">-₱0.00</span></div>
+    <div class="sum-line total"><span>Amount Due</span><span class="mono" id="coTotal">₱0.00</span></div>
+
+    <div id="cashFields">
+      <div class="field" style="margin-top:14px;">
+        <label for="paymentInput">Payment received (₱)</label>
+        <input type="number" id="paymentInput" min="0" step="0.01" placeholder="0.00" />
+      </div>
+      <div class="sum-line"><span>Change</span><span class="mono" id="coChange">₱0.00</span></div>
+    </div>
+
+    <div class="credit-note" id="creditNote" style="display:none;">
+      ⚠️ No payment now. The total of <span id="creditNoteAmount">₱0.00</span> will be added to the Credit Log under the customer's name, and can be paid at a later date.
+    </div>
+
+    <div class="login-error" id="checkoutError"></div>
+    <div class="modal-close-row">
+      <button class="btn-secondary" id="cancelCheckout">Cancel</button>
+      <button class="btn-primary" id="confirmCheckout">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RECEIPT MODAL ===================== -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal-box">
+    <div id="printArea">
+      <div class="receipt" id="receiptContent"></div>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn-secondary" onclick="window.print()">🖨️ Print</button>
+      <button class="btn-primary" id="closeReceipt">Done, New Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== REPORTS MODAL ===================== -->
+<div class="modal-overlay" id="reportsModal">
+  <div class="modal-box wide">
+    <h2>📊 Shift Report</h2>
+    <div class="stat-cards">
+      <div class="stat-card"><div class="val" id="repCount">0</div><div class="lbl">Transactions</div></div>
+      <div class="stat-card"><div class="val" id="repTotal">₱0</div><div class="lbl">Total Sales</div></div>
+      <div class="stat-card"><div class="val" id="repTop">—</div><div class="lbl">Top Product</div></div>
+    </div>
+    <div id="adminToggleWrap" style="display:none; margin-bottom:10px;">
+      <label style="font-size:0.8rem; font-weight:600;">
+        <input type="checkbox" id="adminAllShifts" /> Show all cashiers / all shifts (admin)
+      </label>
+    </div>
+    <div class="report-scroll">
+      <table class="report-table">
+        <thead><tr><th>Txn ID</th><th>Time</th><th>Cashier</th><th>Shift</th><th>Items</th><th>Total</th><th>Payment</th></tr></thead>
+        <tbody id="reportTableBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn-primary" id="closeReports">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CREDIT LOG MODAL ===================== -->
+<div class="modal-overlay" id="utangModal">
+  <div class="modal-box wide">
+    <h2>📒 Credit Log (Customer Credits)</h2>
+    <div class="utang-total-bar">
+      <span>Total outstanding credit</span>
+      <span class="val" id="utangTotal">₱0.00</span>
+    </div>
+    <div class="report-scroll">
+      <table class="report-table">
+        <thead><tr><th>Customer</th><th>Amount Owed</th><th>Date Borrowed</th><th>Txn ID</th><th>Cashier</th><th></th></tr></thead>
+        <tbody id="utangTableBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn-primary" id="closeUtang">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
